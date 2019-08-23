@@ -63,6 +63,12 @@ function addUploadedFile(file) {
   $uploadedFiles.appendChild($listItem);
 }
 
+const mapping = {
+  date: 1,
+  units: 5,
+  unitCost: 6,
+  total: 7
+};
 function transformRow(row) {
   const [
     _,
@@ -76,7 +82,10 @@ function transformRow(row) {
   ] = row.values;
 
   return [
-    orderDate, region, rep, units, unitCost, item, total
+    row.values[mapping.date],
+    row.values[mapping.units],
+    row.values[mapping.unitCost],
+    row.values[mapping.total]
   ];
 };
 
@@ -89,9 +98,13 @@ $generate.addEventListener('click', function() {
 
   const wb = new Excel.Workbook();
   const ws = wb.addWorksheet();
+  ws.addRow(['Date', 'Units', 'Unit cost', 'Total']);
   excelData.forEach(sheet => {
-    // this writes headers for all files
-    sheet.eachRow(row => {
+    sheet.eachRow((row, rowIndex) => {
+      if (rowIndex === 1) {
+        // skip header row
+        return;
+      }
       ws.addRow(transformRow(row));
     });
   });
