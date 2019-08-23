@@ -11,10 +11,21 @@
         width:  200px;
         height: 100px;
       }
-    </style>
+
+      .is-dragover {
+        background-color: gray;
+      }
+  </style>
 </head>
 <body>
   <div class="js-drop dropZone">
+    <label>
+      Choose a file
+      <input class="js-file-input" type="file" multiple>
+    </label>
+
+    <p>or</p>
+  
     <p>Drag one or more files to this Drop Zone ...</p>
   </div>
 

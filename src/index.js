@@ -3,6 +3,34 @@ import { saveAs } from 'file-saver'
 
 const excelData = [];
 const $dropZone = document.querySelector('.js-drop');
+const $fileInput = document.querySelector('.js-file-input');
+$fileInput.addEventListener('change', function(e) {
+  const files = e.target.files;
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+
+    createExcelWorksheetFromFile(file);
+  }
+});
+
+function createExcelWorksheetFromFile(file) {
+    const reader = new FileReader();
+    reader.readAsArrayBuffer(file);
+
+    reader.onload = () => {
+      addUploadedFile(file); // handles UI updates
+
+      // Read worksheet information from drag-and-dropped excel sheets
+      const buffer = reader.result;
+      const wb = new Excel.Workbook();
+      wb.xlsx.load(buffer).then(workbook => {
+        workbook.eachSheet((sheet, id) => {
+          excelData.push(sheet);
+        });
+      });
+    };
+}
 
 $dropZone.addEventListener("drop", function dropHandler(e) {
   e.preventDefault();
@@ -11,28 +39,22 @@ $dropZone.addEventListener("drop", function dropHandler(e) {
     for (let i = 0; i < e.dataTransfer.items.length; i++) {
       const currentItem = e.dataTransfer.items[i];
       const file = currentItem.getAsFile();
-      console.log(file);
-      const reader = new FileReader();
-      reader.readAsArrayBuffer(file);
-      reader.onload = () => {
-        addUploadedFile(file);
-
-        // Read worksheet information from drag-and-dropped excel sheets
-        const buffer = reader.result;
-        const wb = new Excel.Workbook();
-        wb.xlsx.load(buffer).then(workbook => {
-          workbook.eachSheet((sheet, id) => {
-            excelData.push(sheet);
-          });
-        });
-      };
+      createExcelWorksheetFromFile(file);
     }
   }
 });
 
 $dropZone.addEventListener("dragover", function(e) {
   e.preventDefault();
+  $dropZone.classList.add("is-dragover");
 });
+
+['dragleave', 'dragend', 'drop'].forEach(eventType => {
+  $dropZone.addEventListener(eventType, () => {
+    $dropZone.classList.remove("is-dragover");
+  });
+});
+
 
 const $uploadedFiles = document.querySelector('.js-uploaded');
 function addUploadedFile(file) {
